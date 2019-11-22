@@ -50,7 +50,7 @@ def h3(event):
         print('Чтобы удалить объект, его надо предварительно выделить!')
         return
     else:
-        lst.delete (idx)   
+        lst.delete(idx)   
         credits_banks.pop(idx[0])
     
     
@@ -114,6 +114,7 @@ lab5 = Label(root)
 
 for i in credits_banks:
      lst.insert(END, i) 
+
 #------------------------------------------------------------------------------
 lst.grid(row=0, column=0, rowspan=3, padx=10, pady=10)     
 scroll.grid(row = 5, column = 0)
