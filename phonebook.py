@@ -14,10 +14,6 @@ class Phone:
         self.city = city
         self.date = date
 
-        
-    def __str__(self): #вызывается функциями str, print и format и возвращает строковое представление объекта
-        return '{} {} {} {} {} {}'.format(self.surname, self.name, self.number, self.country, self.city, self.date)
-
 #----------------------------------------------------------------------        
 
 try:
@@ -27,10 +23,10 @@ except:
     data = []
 
 #------------------------------------------------------------------------------
+
 root = Tk()
 root.configure(bg = '#263140')
-
-                                                   
+                                             
 #-----------------------------------------------------------------------------
 lbl1 = Label(root, text = 'Телефонный справочник', bg = "#263140", fg = '#f5f3f0')
 lbl2 = Label(root, text = 'Фамилия', bg = "#263140", fg = '#f5f3f0')
@@ -59,10 +55,18 @@ btn2 = Button(root, text = 'Найти')
 btn3 = Button(root, text = 'Добавить')
 btn4 = Button(root, text = 'Изменить')
 btn5 = Button(root, text = 'Показать всё')
-btn6 = Button(root, text = 'Удалить')
+btn6 = Button(root, text = 'Очистить всё')
+btn7 = Button(root, text = 'Удалить')
+btn8 = Button(root, text = 'Статистика')
 
 
-box = Listbox(root, selectmode = SINGLE, height = 40, width = 125)
+box1 = Listbox(root, selectmode = SINGLE, height = 40)
+box2 = Listbox(root, selectmode = SINGLE, height = 40)
+box3 = Listbox(root, selectmode = SINGLE, height = 40)
+box4 = Listbox(root, selectmode = SINGLE, height = 40)
+box5 = Listbox(root, selectmode = SINGLE, height = 40)
+box6 = Listbox(root, selectmode = SINGLE, height = 40)
+
 #------funtions------------------------------------------------------------------------
 
 def check_corr_date(day,month,year):
@@ -76,6 +80,9 @@ def check_name_exist(record):
     for el in data:
         if el.surname == record.surname and el.name == record.name:
             mb.showerror('Ошибка','Уже существует в справочнике такой человек')
+            return (1)
+        if el.number[2:] == record.number[2:]:
+            mb.showerror('Ошибка','Уже существует в справочнике такой номер')
             return (1)
     return (0)
 
@@ -98,7 +105,7 @@ def check_input_for_add(record):
         mb.showerror('Ошибка','Заполните поле Номер')
         return (1)
     else:
-        if record.number[0] != '+' and record.number[1] != '7':
+        if record.number[0] != '+' or record.number[1] != '7':
             mb.showerror('Ошибка','Введите номер в формате: +7')
             return (1)
         if len(record.number) != 12:    
@@ -128,7 +135,13 @@ def add_record(event):
     if check_name_exist(record) == 1:
         return
     else:
-        box.insert(END, record)
+        record.number = '8' + record.number[2:]
+        box1.insert(END, record.surname)
+        box2.insert(END, record.name)
+        box3.insert(END, record.number)
+        box4.insert(END, record.country)
+        box5.insert(END, record.city)
+        box6.insert(END, record.date)
         ent1.delete(0, END)
         ent2.delete(0, END)
         ent3.delete(0, END)
@@ -142,16 +155,93 @@ def save_file(event):
     pickle.dump(data, fd)
     fd.close()
 
-def show_all(event):
-    box.delete(0, END)
+def find_record(event):
+    box1.delete(0, END)
+    box2.delete(0, END)
+    box3.delete(0, END)
+    box4.delete(0, END)
+    box5.delete(0, END)
+    box6.delete(0, END)
+    inp = Phone(ent1.get(), ent2.get(), ent3.get(), ent4.get(), ent5.get(), ent6.get())
     for record in data:
-        box.insert(END, record)
+        if inp.surname in record.surname and inp.name in record.name and inp.number in record.number and inp.country in record.country and inp.city in record.city and inp.date in record.date:
+            box1.insert(END, record.surname)
+            box2.insert(END, record.name)
+            box3.insert(END, record.number)
+            box4.insert(END, record.country)
+            box5.insert(END, record.city)
+            box6.insert(END, record.date)
 
-def find(event):
+def show_all(event):
+    box1.delete(0, END)
+    box2.delete(0, END)
+    box3.delete(0, END)
+    box4.delete(0, END)
+    box5.delete(0, END)
+    box6.delete(0, END)
+    for record in data:
+        box1.insert(END, record.surname)
+        box2.insert(END, record.name)
+        box3.insert(END, record.number)
+        box4.insert(END, record.country)
+        box5.insert(END, record.city)
+        box6.insert(END, record.date)
+
+def delete_record(event):
+    index = box1.curselection()
+    if (index == tuple()):
+        mb.showerror('Ошибка', 'Выберите фамилию человека, которого хотите удалить')
+        return
+    else:
+        box1.delete(index)
+        box2.delete(index)
+        box3.delete(index)
+        box4.delete(index)
+        box5.delete(index)
+        box6.delete(index)
+        data.pop(index[0])
+
+def clear_all(event):
+    box1.delete(0, END)
+    box2.delete(0, END)
+    box3.delete(0, END)
+    box4.delete(0, END)
+    box5.delete(0, END)
+    box6.delete(0, END)
+'''
+def update_record(event):
+        inp = Phone(ent1.get(), ent2.get(), ent3.get(), ent4.get(), ent5.get(), ent6.get())
+        inp.number = '8' + inp.number[2:]
+        found_it = 0
+        for record in data:
+            if inp.surname == record.surname and inp.name == record.surname:
+                found_it += 1
+        if found_it != 1:
+            '''
     
 #--------------------------------------------------------------------------------
 
-
+def show_stat(event):
+    count = len(data)
+    dict_countries = {}
+    dict_cities = {}
+    output = ''
+    output2 = ''
+    for record in data:
+        if dict_countries.get(record.country) == None:
+            dict_countries[record.country] = 1
+        else:
+            dict_countries[record.country] += 1
+    for key, value in dict_countries.items():
+        output += key + ' ' +  str(value) + '\n'
+    for record in data:
+        if dict_cities.get(record.city) == None:
+            dict_cities[record.city] = 1
+        else:
+            dict_cities[record.city] += 1
+    for key, value in dict_cities.items():
+        output2 += key + ' ' +  str(value) + '\n'
+    mb.showinfo('Статистика','Всего человек в справочнике: ' + str(count) + '\n' + 'Статистика по странам\n' + output + 'Статистика по городам\n' + output2)
 
 #------------------------------------------------------------------------------
 lbl1.grid(columnspan = 5, pady = 6)
@@ -180,17 +270,26 @@ btn1.grid(row = 0, column = 5, pady = 4)
 btn2.grid(row = 3, column = 0, pady = 4)
 btn3.grid(row = 3, column = 1, pady = 4)
 btn4.grid(row = 3, column = 2, pady = 4)
-btn5.grid(row = 6, column = 0, columnspan = 2, pady = 2)
-btn6.grid(row = 6, column = 5, pady = 4)
+btn5.grid(row = 6, column = 0, pady = 4)
+btn6.grid(row = 6, column = 1, pady = 4)
+btn7.grid(row = 6, column = 5, pady = 4)
+btn8.grid(row = 6, column = 2, pady = 4)
 
 
-box.grid(row = 7, columnspan = 6, padx = 5, pady = 10)
+box1.grid(row = 7, column = 0, padx = 5, pady = 10)
+box2.grid(row = 7, column = 1, padx = 5, pady = 10)
+box3.grid(row = 7, column = 2, padx = 5, pady = 10)
+box4.grid(row = 7, column = 3, padx = 5, pady = 10)
+box5.grid(row = 7, column = 4, padx = 5, pady = 10)
+box6.grid(row = 7, column = 5, padx = 5, pady = 10)
 
 btn1.bind('<Button-1>', save_file)
-btn2.bind('<Button-1>')
+btn2.bind('<Button-1>', find_record)
 btn3.bind('<Button-1>', add_record)
 btn4.bind('<Button-1>')
 btn5.bind('<Button-1>', show_all)
-btn6.bind('<Button-1>')
+btn6.bind('<Button-1>', clear_all)
+btn7.bind('<Button-1>', delete_record)
+btn8.bind('<Button-1>', show_stat)
 
 root.mainloop()
