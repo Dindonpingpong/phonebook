@@ -128,6 +128,14 @@ def check_input_for_add(record):
             return (1)
     return (0)
 
+def clear_entries():
+    ent1.delete(0, END)
+    ent2.delete(0, END)
+    ent3.delete(0, END)
+    ent4.delete(0, END)
+    ent5.delete(0, END)
+    ent6.delete(0, END)
+
 def add_record(event):
     record = Phone(ent1.get(), ent2.get(), ent3.get(), ent4.get(), ent5.get(), ent6.get())
     if check_input_for_add(record) == 1:
@@ -142,12 +150,7 @@ def add_record(event):
         box4.insert(END, record.country)
         box5.insert(END, record.city)
         box6.insert(END, record.date)
-        ent1.delete(0, END)
-        ent2.delete(0, END)
-        ent3.delete(0, END)
-        ent4.delete(0, END)
-        ent5.delete(0, END)
-        ent6.delete(0, END)
+        clear_entries()
         data.append(record)
 
 def save_file(event):
@@ -155,13 +158,16 @@ def save_file(event):
     pickle.dump(data, fd)
     fd.close()
 
-def find_record(event):
+def clear_boxes():
     box1.delete(0, END)
     box2.delete(0, END)
     box3.delete(0, END)
     box4.delete(0, END)
     box5.delete(0, END)
     box6.delete(0, END)
+
+def find_record(event):
+    clear_boxes()
     inp = Phone(ent1.get(), ent2.get(), ent3.get(), ent4.get(), ent5.get(), ent6.get())
     for record in data:
         if inp.surname in record.surname and inp.name in record.name and inp.number in record.number and inp.country in record.country and inp.city in record.city and inp.date in record.date:
@@ -173,12 +179,7 @@ def find_record(event):
             box6.insert(END, record.date)
 
 def show_all(event):
-    box1.delete(0, END)
-    box2.delete(0, END)
-    box3.delete(0, END)
-    box4.delete(0, END)
-    box5.delete(0, END)
-    box6.delete(0, END)
+    clear_boxes()
     for record in data:
         box1.insert(END, record.surname)
         box2.insert(END, record.name)
@@ -193,31 +194,64 @@ def delete_record(event):
         mb.showerror('Ошибка', 'Выберите фамилию человека, которого хотите удалить')
         return
     else:
-        box1.delete(index)
-        box2.delete(index)
-        box3.delete(index)
-        box4.delete(index)
-        box5.delete(index)
-        box6.delete(index)
+        clear_boxes()
         data.pop(index[0])
 
-def clear_all(event):
-    box1.delete(0, END)
-    box2.delete(0, END)
-    box3.delete(0, END)
-    box4.delete(0, END)
-    box5.delete(0, END)
-    box6.delete(0, END)
-'''
+def clear_outputs(event):
+    clear_boxes()
+
+def check_error_update(record):
+    for el in data:
+        if el.surname == record.surname and el.name == record.name:
+            mb.showerror()
+
+def check_input_for_update(record):
+    if len(record.number) > 0:
+        if record.number[0] != '+' or record.number[1] != '7':
+            mb.showerror('Ошибка','Введите номер в формате: +7')
+            return (1)
+        if len(record.number) != 12:    
+            mb.showerror('Ошибка','Введите 11 цифр')
+            return (1)
+    if len(record.country) > 0:
+        if record.country.islower():
+            mb.showerror('Ошибка','Введите страну с заглавной буквы')
+            return (1)
+    if len(record.city) > 0:
+        if record.city.islower():
+            mb.showerror('Ошибка','Введите город с заглавной буквы')
+            return (1)
+    if len(record.date) > 0:
+        if len(record.date) != 10:
+            mb.showerror('Ошибка','Введите дату рождения в формате: ДД.ММ.ГГГГ')
+            return (1)
+        if check_corr_date(int(record.date[0:2]),int(record.date[3:5]),int(record.date[6:8])):
+            mb.showerror('Ошибка','Введите корректную дату')
+            return (1)
+    return (0)
+
 def update_record(event):
         inp = Phone(ent1.get(), ent2.get(), ent3.get(), ent4.get(), ent5.get(), ent6.get())
+        check_input_for_update(inp)
         inp.number = '8' + inp.number[2:]
-        found_it = 0
+        index = box1.curselection()
         for record in data:
-            if inp.surname == record.surname and inp.name == record.surname:
-                found_it += 1
-        if found_it != 1:
-            '''
+            if record.surname == inp.surname and record.name == inp.name:
+                mb.showerror('Ошибка', 'Фамилия и Имя на которое вы хотите изменить уже существуют в справочнике')
+                return
+        if (index == tuple()):
+            mb.showerror('Ошибка','Выберите фамилию человека, данные которого хотите изменить')
+            return
+        else:
+            data[index[0]].surname = inp.surname if len(ent1.get()) > 0 else data[index[0]].surname
+            data[index[0]].name = inp.name if len(ent2.get()) > 0 else data[index[0]].name
+            data[index[0]].number = inp.number if len(ent3.get()) > 0 else data[index[0]].number
+            data[index[0]].country = inp.country if len(ent4.get()) > 0 else data[index[0]].country
+            data[index[0]].city = inp.city if len(ent5.get()) > 0 else data[index[0]].city
+            data[index[0]].date = inp.date if len(ent6.get()) > 0 else data[index[0]].date
+            clear_entries()
+            show_all(event)
+
     
 #--------------------------------------------------------------------------------
 
@@ -227,6 +261,7 @@ def show_stat(event):
     dict_cities = {}
     output = ''
     output2 = ''
+    avg_age = 0
     for record in data:
         if dict_countries.get(record.country) == None:
             dict_countries[record.country] = 1
@@ -239,9 +274,12 @@ def show_stat(event):
             dict_cities[record.city] = 1
         else:
             dict_cities[record.city] += 1
+    for record in data:
+        avg_age += 2019 - int(record.date[6:])
+    avg_age /= len(data)
     for key, value in dict_cities.items():
         output2 += key + ' ' +  str(value) + '\n'
-    mb.showinfo('Статистика','Всего человек в справочнике: ' + str(count) + '\n' + 'Статистика по странам\n' + output + 'Статистика по городам\n' + output2)
+    mb.showinfo('Статистика','Всего человек в справочнике: ' + str(count) + '\nСредниий возраст: {:.2f}'.format(avg_age) +  '\n' + 'Статистика по странам:\n' + output + 'Статистика по городам:\n' + output2)
 
 #------------------------------------------------------------------------------
 lbl1.grid(columnspan = 5, pady = 6)
@@ -286,9 +324,9 @@ box6.grid(row = 7, column = 5, padx = 5, pady = 10)
 btn1.bind('<Button-1>', save_file)
 btn2.bind('<Button-1>', find_record)
 btn3.bind('<Button-1>', add_record)
-btn4.bind('<Button-1>')
+btn4.bind('<Button-1>', update_record)
 btn5.bind('<Button-1>', show_all)
-btn6.bind('<Button-1>', clear_all)
+btn6.bind('<Button-1>', clear_outputs)
 btn7.bind('<Button-1>', delete_record)
 btn8.bind('<Button-1>', show_stat)
 
