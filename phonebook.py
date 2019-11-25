@@ -14,7 +14,7 @@ class Phone:
         self.city = city
         self.date = date
 
-#----------------------------------------------------------------------        
+#----read file with data if it exist or create------------------------------------------       
 
 try:
     with open('phonebook_data', 'rb') as i:
@@ -22,12 +22,12 @@ try:
 except:
     data = []
 
-#------------------------------------------------------------------------------
+#----init GUI--------------------------------------------------------------------------
 
 root = Tk()
 root.configure(bg = '#263140')
                                              
-#-----------------------------------------------------------------------------
+#----create labels, entries, buttons, boxes---------------------------------------------
 lbl1 = Label(root, text = 'Телефонный справочник', bg = "#263140", fg = '#f5f3f0')
 lbl2 = Label(root, text = 'Фамилия', bg = "#263140", fg = '#f5f3f0')
 lbl3 = Label(root, text = 'Имя', bg = "#263140", fg = '#f5f3f0')
@@ -67,7 +67,7 @@ box4 = Listbox(root, selectmode = SINGLE, height = 40)
 box5 = Listbox(root, selectmode = SINGLE, height = 40)
 box6 = Listbox(root, selectmode = SINGLE, height = 40)
 
-#------funtions------------------------------------------------------------------------
+#------funtions for buttons---------------------------------------------------------------------
 
 def check_corr_date(day,month,year):
     try:
@@ -252,9 +252,6 @@ def update_record(event):
             clear_entries()
             show_all(event)
 
-    
-#--------------------------------------------------------------------------------
-
 def show_stat(event):
     count = len(data)
     dict_countries = {}
@@ -281,7 +278,8 @@ def show_stat(event):
         output2 += key + ' ' +  str(value) + '\n'
     mb.showinfo('Статистика','Всего человек в справочнике: ' + str(count) + '\nСредниий возраст: {:.2f}'.format(avg_age) +  '\n' + 'Статистика по странам:\n' + output + 'Статистика по городам:\n' + output2)
 
-#------------------------------------------------------------------------------
+#-------arrange labels, entries, buttons, boxes------------------------------------------------------
+
 lbl1.grid(columnspan = 5, pady = 6)
 lbl2.grid(row = 1, column = 0, pady = 4)
 lbl3.grid(row = 1, column = 1, pady = 4)
